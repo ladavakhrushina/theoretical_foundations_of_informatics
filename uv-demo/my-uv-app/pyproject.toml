@@ -1,0 +1,21 @@
+[project]
+name = "my-uv-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "lwwrxd", email = "vakhrushinalada@mail.ru" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "httpx>=0.28.1",
+    "requests>=2.34.2",
+    "rich>=15.0.0",
+]
+
+[project.scripts]
+my-uv-app = "my_uv_app:main"
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
