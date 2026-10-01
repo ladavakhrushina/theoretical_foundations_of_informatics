@@ -1,9 +1,5 @@
-valid_status = ['новый', 'в обработке', 'выполнен', 'отменён']
-
-
-
-
 def load_orders(file):
+    valid_status = ['новый', 'в обработке', 'выполнен', 'отменён']
     orders = []
     errors = []
     count_of_errors = 0
@@ -113,7 +109,6 @@ def all_categories(orders):
     categories = {order["category"] for order in orders}
     return sorted(categories)
 
-orders, errors, count_of_errors = load_orders('orders.txt')
 
 def sort_by_cost(orders):
     sorted_orders = sorted(orders, key = lambda p: (-full_cost(p), p["id"]))
@@ -127,17 +122,17 @@ def sort_by_category(orders):
 
 def find_by_status(orders, status):
     status = status.strip().casefold()
-    return [order for order in orders if status in order["status"]]
+    return [order for order in orders if status in order["status"].casefold()]
 
 
 def find_by_category(orders, category):
     category = category.strip().casefold()
-    return [order for order in orders if category in order["category"]]
+    return [order for order in orders if category in order["category"].casefold()]
 
 
 def find_by_name(orders, name):
     name = name.strip().casefold()
-    return [order for order in orders if name in order["name"]]
+    return [order for order in orders if name in order["name"].casefold()]
 
 
 def large_orders(orders):
@@ -174,6 +169,7 @@ def category_statistics(orders):
 
 def status_statistics(orders):
     result = {}
+    valid_status = ['новый', 'в обработке', 'выполнен', 'отменён']
 
     for status in valid_status:
         count = len([order for order in orders if order["status"] == status])
@@ -230,32 +226,31 @@ def overall_statistics(orders):
 
 
 def print_orders(orders):
-    print('номер   покупатель        категория     сумма      статус\n')
+    print('\nномер    покупатель       категория     сумма       статус\n')
     for order in orders:
         print(f'№{order["id"]:<6} {order["name"]:<17} {order["category"]:<13} {full_cost(order):<10} {order["status"]}')
-
-
-
 
 
 def save_report(orders, errors, count_of_errors):
     with open('orders_reprt.txt', 'a', encoding='utf-8') as f:
 
-        f.write(f'\n        ОТЧЁТ ПО АНАЛИЗУ ЗАКАЗОВ')
-        f.write(f'Количество корректных записей: {len(orders)}')
-        f.write(f'Количество некорректных записей: {count_of_errors}')
-        f.write(f'Уникальные категории: {', '.join(all_categories(orders))}')
+        f.write(f'\n        ОТЧЁТ ПО АНАЛИЗУ ЗАКАЗОВ\n')
+        f.write(f'\nКоличество корректных записей: {len(orders)}')
+        f.write(f'\nКоличество некорректных записей: {count_of_errors}')
+        f.write(f'\nУникальные категории: {', '.join(all_categories(orders))}')
 
         f.write('\n\n       ЗАКАЗЫ ПО УБЫВАНИЮ СТОИМОСТИ\n')
+        f.write('\nномер    покупатель        сумма      статус\n')
         for num, order in enumerate(sort_by_cost(orders), start=1):
-            f.write(f'\n{num}. №{order["id"]} | {order["name"]} | {full_cost(order)} | {order["status"]}')
+            f.write(f'\n№{order["id"]:<5}| {order["name"]:<17}| {full_cost(order):<8}| {order["status"]}')
 
         f.write('\n\n       КРУПНЫЕ ЗАКАЗЫ\n')
+        f.write('\nномер    покупатель        сумма      статус\n')
         num = 0
         for order in orders:
             if cost_category(full_cost(order)) == 'Крупный':
                 num += 1
-                f.write(f'\n{num}. №{order["id"]} | {order["name"]} | {full_cost(order)} | {order["status"]}')
+                f.write(f'\n№{order["id"]:<5}| {order["name"]:<17}| {full_cost(order):<8}| {order["status"]}')
 
         f.write('\n\n       ОБЩИЕ ПОКАЗАТЕЛИ\n')
         f.write(f'\nОбщее количество заказов: {overall_statistics(orders)["total_orders"]}')
@@ -289,8 +284,8 @@ def main_programm():
 
     while True:
         print("""
-\n      МЕНЮ
-1. Показать все заказы
+\n         \033[33mМЕНЮ\033[0m\n
+\033[35m1. Показать все заказы
 2. Показать заказы по убыванию стоимости
 3. Показать заказы по категориям
 4. Найти заказы по статусу
@@ -299,21 +294,38 @@ def main_programm():
 7. Показать крупные заказы
 8. Показать статистику
 9. Сохранить отчёт
-0. Завершить программу""")
-        choice = int(input().strip().casefold())
+0. Завершить программу\033[0m\n""")
+        choice = input('\033[36mВыберите пункт: \033[0m').strip().casefold()
 
-        if choice == 1:
+        if choice == '1':
             print_orders(orders)
-
-main_programm()
-
-
-
-
-
+        elif choice == '2':
+            print_orders(sort_by_cost(orders))
+        elif choice == '3':
+            print_orders(sort_by_category(orders))
+        elif choice == '4':
+            status = input('\033[36mВведите статус: \033[0m').strip().casefold()
+            print_orders(find_by_status(orders, status))
+        elif choice == '5':
+            category = input('\033[36mВведите категорию: \033[0m').strip().casefold()
+            print_orders(find_by_category(orders, category))
+        elif choice == '6':
+            name = input('\033[36mВведите имя покупателя: \033[0m').strip().casefold()
+            print_orders(find_by_name(orders, name))
+        elif choice == '7':
+            print('\nномер    покупатель        сумма      статус\n')
+            for order in orders:
+                        if cost_category(full_cost(order)) == 'Крупный':
+                            print(f'№{order["id"]:<5}| {order["name"]:<17}| {full_cost(order):<8}| {order["status"]}')
+        elif choice == '8':
+            pass
+        elif choice == '9':
+            save_report(orders, errors, count_of_errors)
+        elif choice == '0':
+            print('\n\033[31mПрограмма завершена\033[0m\n')
+            break
         
 
-save_report(orders, errors, count_of_errors)
 
 
-
+main_programm()
